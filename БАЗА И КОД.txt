@@ -1,0 +1,154 @@
+ private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string groupnumber = textbd.Text;
+            if(groupnumber.Length == 0)
+            {
+                MessageBox.Show("Необходимо ввести номер группы");
+                return;
+            }
+
+            db.base04Entities connection = new db.base04Entities();
+            db.Group isExists = connection.Group.Where(g => g.Id_Group ==int.Parse (groupnumber)).FirstOrDefault();
+            if(isExists != null)
+            {
+                MessageBox.Show("Группа с таким именем уже существует");
+                return;
+            }
+
+            db.Group group = new db.Group();
+            group.Id_Group = int.Parse(groupnumber);
+            connection.Group.Add(group);
+
+            int result = connection.SaveChanges();
+            if(result ==1)
+            {
+                
+                MessageBox.Show("Группа успешно добавлена");
+
+            }
+        }
+
+
+
+БАЗА
+use base04
+go
+CREATE TABLE [Teacher] (
+	Id_Teacher int NOT NULL,
+	Name_Teacher varchar(255) NOT NULL,
+	Surname_Teacher varchar(255) NOT NULL,
+	Phone_number varchar(15) NOT NULL,
+  CONSTRAINT [PK_TEACHER] PRIMARY KEY CLUSTERED
+  (
+  [Id_Teacher] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+CREATE TABLE [Discipline] (
+	Id_Discipline int NOT NULL,
+	Title varchar(255) NOT NULL,
+  CONSTRAINT [PK_DISCIPLINE] PRIMARY KEY CLUSTERED
+  (
+  [Id_Discipline] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+CREATE TABLE [Student] (
+	Id_Student int NOT NULL,
+	Name_Student varchar(255) NOT NULL,
+	Surname_Student varchar(255) NOT NULL,
+	Course int NOT NULL,
+  CONSTRAINT [PK_STUDENT] PRIMARY KEY CLUSTERED
+  (
+  [Id_Student] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+CREATE TABLE [journal] (
+	Id_journal int NOT NULL,
+	Teacher int NOT NULL,
+	Student int NOT NULL,
+	Evaluation int NOT NULL,
+	Id_Timetable int NOT NULL,
+  CONSTRAINT [PK_JOURNAL] PRIMARY KEY CLUSTERED
+  (
+  [Id_journal] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+CREATE TABLE [Teacher_Discipline] (
+	Teacher int NOT NULL,
+	Discipline int NOT NULL,
+	Id_Teacher_Discipline int NOT NULL UNIQUE,
+  CONSTRAINT [PK_TEACHER_DISCIPLINE] PRIMARY KEY CLUSTERED
+  (
+  [Teacher] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+CREATE TABLE [Group] (
+	Student int NOT NULL,
+	Id_Group int NOT NULL,
+  CONSTRAINT [PK_GROUP] PRIMARY KEY CLUSTERED
+  (
+  [Id_Group] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+CREATE TABLE [Timetable] (
+	date int NOT NULL,
+	Subject varchar(255) NOT NULL,
+	[Group] int NOT NULL,
+	Pair int NOT NULL,
+	Subgroup int NOT NULL,
+	LectorRoom varchar(255) NOT NULL,
+	Id_Timetable int NOT NULL UNIQUE,
+  CONSTRAINT [PK_TIMETABLE] PRIMARY KEY CLUSTERED
+  (
+  [date] ASC
+  ) WITH (IGNORE_DUP_KEY = OFF)
+
+)
+GO
+
+
+
+ALTER TABLE [journal] WITH CHECK ADD CONSTRAINT [journal_fk0] FOREIGN KEY ([Teacher]) REFERENCES [Teacher_Discipline]([Id_Teacher_Discipline])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [journal] CHECK CONSTRAINT [journal_fk0]
+GO
+ALTER TABLE [journal] WITH CHECK ADD CONSTRAINT [journal_fk1] FOREIGN KEY ([Student]) REFERENCES [Student]([Id_Student])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [journal] CHECK CONSTRAINT [journal_fk1]
+GO
+ALTER TABLE [journal] WITH CHECK ADD CONSTRAINT [journal_fk2] FOREIGN KEY ([Id_Timetable]) REFERENCES [Timetable]([Id_Timetable])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [journal] CHECK CONSTRAINT [journal_fk2]
+GO
+
+ALTER TABLE [Teacher_Discipline] WITH CHECK ADD CONSTRAINT [Teacher_Discipline_fk0] FOREIGN KEY ([Teacher]) REFERENCES [Teacher]([Id_Teacher])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [Teacher_Discipline] CHECK CONSTRAINT [Teacher_Discipline_fk0]
+GO
+ALTER TABLE [Teacher_Discipline] WITH CHECK ADD CONSTRAINT [Teacher_Discipline_fk1] FOREIGN KEY ([Discipline]) REFERENCES [Discipline]([Id_Discipline])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [Teacher_Discipline] CHECK CONSTRAINT [Teacher_Discipline_fk1]
+GO
+
+ALTER TABLE [Group] WITH CHECK ADD CONSTRAINT [Group_fk0] FOREIGN KEY ([Student]) REFERENCES [Student]([Id_Student])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [Group] CHECK CONSTRAINT [Group_fk0]
+GO
+
